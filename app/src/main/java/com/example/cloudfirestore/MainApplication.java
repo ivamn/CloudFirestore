@@ -143,6 +143,7 @@ public class MainApplication extends AppCompatActivity {
         } else if (requestCode == COD_ADD & resultCode == RESULT_OK) {
             Ciudad c = (Ciudad) data.getExtras().get("ciudad");
             db.collection("ciudades").document(c.getCiudad()).set(c);
+            uploadImage(c.getImagen());
         } else if (resultCode == RESULT_CANCELED) {
             Toast.makeText(this, "Se ha cancelado la operación", Toast.LENGTH_SHORT).show();
         }
