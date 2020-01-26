@@ -58,7 +58,8 @@ public class AddCiudad extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == COD_ELEGIR_IMAGEN && resultCode == RESULT_OK) {
             Uri rutaImagen = data.getData();
-
+            c.setImagen(rutaImagen.toString());
+            imagen.setImageURI(rutaImagen);
         } else if (resultCode == RESULT_CANCELED) {
             Toast.makeText(this, "Se ha cancelado la operación", Toast.LENGTH_SHORT).show();
         }

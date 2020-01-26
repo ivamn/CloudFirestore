@@ -6,6 +6,8 @@ import android.widget.TextView;
 
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.squareup.picasso.Picasso;
+
 public class Holder extends RecyclerView.ViewHolder {
     private TextView textoCiudad, textPais;
     private ImageView imageView;
@@ -20,5 +22,9 @@ public class Holder extends RecyclerView.ViewHolder {
     public void bind(Ciudad item) {
         textoCiudad.setText(item.getCiudad());
         textPais.setText(item.getPais());
+        assert item.getImagen() != null;
+        if (item.getImagen() != null && !item.getImagen().equals("")) {
+            Picasso.get().load(item.getImagen()).into(imageView);
+        }
     }
 }

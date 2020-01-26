@@ -12,6 +12,9 @@ import android.widget.Toast;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+
 public class EditCiudad extends AppCompatActivity {
 
     private Ciudad c;
@@ -70,7 +73,8 @@ public class EditCiudad extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == COD_ELEGIR_IMAGEN && resultCode == RESULT_OK) {
             Uri rutaImagen = data.getData();
-
+            c.setImagen(rutaImagen.toString());
+            imagen.setImageURI(rutaImagen);
         } else if (resultCode == RESULT_CANCELED) {
             Toast.makeText(this, "Se ha cancelado la operación", Toast.LENGTH_SHORT).show();
         }

@@ -6,7 +6,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -21,6 +20,7 @@ import android.widget.Toast;
 
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException;
@@ -31,18 +31,26 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.ref.WeakReference;
 import java.util.HashMap;
+
+import io.grpc.Context;
 
 public class MainApplication extends AppCompatActivity {
 
     private FirebaseFirestore db;
+    private FirebaseStorage storage;
     private RecyclerView recycler;
     private Adapter adapter;
     private FloatingActionButton fab;
     private int COD_EDITAR = 2;
     private int COD_ADD = 3;
+    private Uri u;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -50,6 +58,7 @@ public class MainApplication extends AppCompatActivity {
         setContentView(R.layout.activity_main_application);
         fab = findViewById(R.id.fab);
         db = FirebaseFirestore.getInstance();
+        storage = FirebaseStorage.getInstance();
         recycler = findViewById(R.id.recycler);
         cargarDatos();
         fab.setOnClickListener(new View.OnClickListener() {
@@ -125,10 +134,11 @@ public class MainApplication extends AppCompatActivity {
         if (requestCode == COD_EDITAR && resultCode == RESULT_OK) {
             Ciudad c = (Ciudad) data.getExtras().get("ciudad");
             String key = (String) data.getExtras().get("key");
+            uploadImage(c.getImagen());
             HashMap<String, Object> hashMap = new HashMap<>();
             hashMap.put("ciudad", c.getCiudad());
             hashMap.put("pais", c.getPais());
-            hashMap.put("imagen", "");
+            hashMap.put("imagen", c.getImagen());
             db.collection("ciudades").document(key).update(hashMap);
         } else if (requestCode == COD_ADD & resultCode == RESULT_OK) {
             Ciudad c = (Ciudad) data.getExtras().get("ciudad");
@@ -136,5 +146,20 @@ public class MainApplication extends AppCompatActivity {
         } else if (resultCode == RESULT_CANCELED) {
             Toast.makeText(this, "Se ha cancelado la operación", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    private void uploadImage(String path){
+        Uri uri = Uri.parse(path);
+        StorageReference refSubida =storage.getReference().child("images/" + uri.getLastPathSegment());
+        refSubida.putFile(uri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                if (task.isSuccessful()) {
+                    Toast.makeText(MainApplication.this, "Se ha subido la imagen", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(MainApplication.this, "No se ha podido subir la imagen", Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 }
