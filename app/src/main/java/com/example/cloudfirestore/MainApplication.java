@@ -1,45 +1,30 @@
 package com.example.cloudfirestore;
 
+import android.content.Intent;
+import android.net.Uri;
+import android.os.Bundle;
+import android.view.View;
+import android.widget.Toast;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
-import android.net.Uri;
-import android.os.Bundle;
-import android.util.Base64;
-import android.util.Log;
-import android.view.View;
-import android.widget.ImageView;
-import android.widget.Toast;
-
 import com.firebase.ui.firestore.FirestoreRecyclerOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException;
 import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.Query;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.io.ByteArrayOutputStream;
-import java.lang.ref.WeakReference;
 import java.util.HashMap;
-
-import io.grpc.Context;
 
 public class MainApplication extends AppCompatActivity {
 
@@ -70,7 +55,7 @@ public class MainApplication extends AppCompatActivity {
         });
     }
 
-    private void cargarDatos(){
+    private void cargarDatos() {
         CollectionReference ref = db.collection("ciudades");
         ref.get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
@@ -84,7 +69,7 @@ public class MainApplication extends AppCompatActivity {
         });
     }
 
-    private void cargarRecycler(Query q){
+    private void cargarRecycler(Query q) {
         FirestoreRecyclerOptions<Ciudad> firestoreRecyclerOptions = new FirestoreRecyclerOptions.Builder<Ciudad>()
                 .setQuery(q, Ciudad.class).build();
         adapter = new Adapter(firestoreRecyclerOptions);
@@ -134,29 +119,30 @@ public class MainApplication extends AppCompatActivity {
         if (requestCode == COD_EDITAR && resultCode == RESULT_OK) {
             Ciudad c = (Ciudad) data.getExtras().get("ciudad");
             String key = (String) data.getExtras().get("key");
-            uploadImage(c.getImagen());
-            HashMap<String, Object> hashMap = new HashMap<>();
-            hashMap.put("ciudad", c.getCiudad());
-            hashMap.put("pais", c.getPais());
-            hashMap.put("imagen", c.getImagen());
-            db.collection("ciudades").document(key).update(hashMap);
+            uploadImage(c, key);
         } else if (requestCode == COD_ADD & resultCode == RESULT_OK) {
             Ciudad c = (Ciudad) data.getExtras().get("ciudad");
             db.collection("ciudades").document(c.getCiudad()).set(c);
-            uploadImage(c.getImagen());
+            //uploadImage(c.getImagen());
         } else if (resultCode == RESULT_CANCELED) {
             Toast.makeText(this, "Se ha cancelado la operación", Toast.LENGTH_SHORT).show();
         }
     }
 
-    private void uploadImage(String path){
-        Uri uri = Uri.parse(path);
-        StorageReference refSubida =storage.getReference().child("images/" + uri.getLastPathSegment());
+    private void uploadImage(final Ciudad c, final String key) {
+        Uri uri = Uri.parse(c.getImagen());
+        final String downloadURL = "images/" + uri.getLastPathSegment();
+        StorageReference refSubida = storage.getReference().child(downloadURL);
         refSubida.putFile(uri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
                 if (task.isSuccessful()) {
                     Toast.makeText(MainApplication.this, "Se ha subido la imagen", Toast.LENGTH_SHORT).show();
+                    HashMap<String, Object> hashMap = new HashMap<>();
+                    hashMap.put("ciudad", c.getCiudad());
+                    hashMap.put("pais", c.getPais());
+                    hashMap.put("imagen", downloadURL);
+                    db.collection("ciudades").document(key).update(hashMap);
                 } else {
                     Toast.makeText(MainApplication.this, "No se ha podido subir la imagen", Toast.LENGTH_SHORT).show();
                 }

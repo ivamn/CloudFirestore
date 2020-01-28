@@ -21,9 +21,9 @@
     <ImageView
         android:layout_gravity="center_horizontal"
         android:id="@+id/imageView"
-        android:layout_width="400dp"
-        android:layout_height="400dp"
-        android:scaleType="fitCenter"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:scaleType="centerCrop"
         android:src="@drawable/ic_default_foreground"
         android:background="@color/ic_default_background"/>
 
