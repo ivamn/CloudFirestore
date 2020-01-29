@@ -25,6 +25,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 import java.util.HashMap;
+import java.util.Random;
 
 public class MainApplication extends AppCompatActivity {
 
@@ -122,31 +123,57 @@ public class MainApplication extends AppCompatActivity {
             uploadImage(c, key);
         } else if (requestCode == COD_ADD & resultCode == RESULT_OK) {
             Ciudad c = (Ciudad) data.getExtras().get("ciudad");
-            db.collection("ciudades").document(c.getCiudad()).set(c);
-            //uploadImage(c.getImagen());
+            uploadImage(c, getKey());
         } else if (resultCode == RESULT_CANCELED) {
             Toast.makeText(this, "Se ha cancelado la operación", Toast.LENGTH_SHORT).show();
         }
     }
 
     private void uploadImage(final Ciudad c, final String key) {
-        Uri uri = Uri.parse(c.getImagen());
-        final String downloadURL = "images/" + uri.getLastPathSegment();
-        StorageReference refSubida = storage.getReference().child(downloadURL);
-        refSubida.putFile(uri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                if (task.isSuccessful()) {
-                    Toast.makeText(MainApplication.this, "Se ha subido la imagen", Toast.LENGTH_SHORT).show();
-                    HashMap<String, Object> hashMap = new HashMap<>();
-                    hashMap.put("ciudad", c.getCiudad());
-                    hashMap.put("pais", c.getPais());
-                    hashMap.put("imagen", downloadURL);
-                    db.collection("ciudades").document(key).update(hashMap);
-                } else {
-                    Toast.makeText(MainApplication.this, "No se ha podido subir la imagen", Toast.LENGTH_SHORT).show();
+        if (c.getImagen() == null || c.getImagen().equals("")) {
+            actualizarRegistro(c, key, "");
+        } else {
+            Uri uri = Uri.parse(c.getImagen());
+            String fileName = getFileNameFromUri(uri);
+            final String downloadURL = "images/" + fileName;
+            StorageReference refSubida = storage.getReference().child(downloadURL);
+            refSubida.putFile(uri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(MainApplication.this, "Se ha subido la imagen", Toast.LENGTH_SHORT).show();
+                        actualizarRegistro(c, key, downloadURL);
+                    } else {
+                        Toast.makeText(MainApplication.this, "No se ha podido subir la imagen", Toast.LENGTH_SHORT).show();
+                    }
                 }
-            }
-        });
+            });
+        }
+    }
+
+    private String getFileNameFromUri(Uri uri){
+        String result = uri.getPath();
+        int cut = result.lastIndexOf('/');
+        if (cut != -1) {
+            result = result.substring(cut + 1);
+        }
+        return result;
+    }
+
+    private String getKey(){
+        Random r = new Random();
+        StringBuilder builder = new StringBuilder();
+        for (int i = 0; i < 10; i++) {
+            builder.append(r.nextInt(96) + 32);
+        }
+        return builder.toString();
+    }
+
+    private void actualizarRegistro(Ciudad c, String key, String downloadURL) {
+        HashMap<String, Object> hashMap = new HashMap<>();
+        hashMap.put("ciudad", c.getCiudad());
+        hashMap.put("pais", c.getPais());
+        hashMap.put("imagen", downloadURL);
+        db.collection("ciudades").document(key).set(hashMap);
     }
 }

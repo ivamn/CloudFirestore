@@ -9,10 +9,18 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.squareup.picasso.Picasso;
+
 public class AddCiudad extends AppCompatActivity {
+    private final String DEFAULT_IMAGE = "/defaul.jpg";
     Ciudad c = new Ciudad();
     private EditText editCiudad, editPais;
     private ImageView imagen;
