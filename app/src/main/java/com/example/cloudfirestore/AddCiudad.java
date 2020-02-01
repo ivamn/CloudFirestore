@@ -20,7 +20,6 @@ import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 public class AddCiudad extends AppCompatActivity {
-    private final String DEFAULT_IMAGE = "/defaul.jpg";
     Ciudad c = new Ciudad();
     private EditText editCiudad, editPais;
     private ImageView imagen;

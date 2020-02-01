@@ -36,7 +36,6 @@ public class MainApplication extends AppCompatActivity {
     private FloatingActionButton fab;
     private int COD_EDITAR = 2;
     private int COD_ADD = 3;
-    private Uri u;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,5 +174,19 @@ public class MainApplication extends AppCompatActivity {
         hashMap.put("pais", c.getPais());
         hashMap.put("imagen", downloadURL);
         db.collection("ciudades").document(key).set(hashMap);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (adapter != null) {
+            adapter.startListening();
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        adapter.stopListening();
     }
 }

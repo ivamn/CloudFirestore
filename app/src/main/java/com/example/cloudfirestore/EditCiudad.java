@@ -21,7 +21,7 @@ import com.squareup.picasso.Picasso;
 
 public class EditCiudad extends AppCompatActivity {
 
-    private final String DEFAULT_IMAGE = "/defaul.jpg";
+    private final String DEFAULT_IMAGE = "/default.jpg";
 
     private Ciudad c;
     private EditText editCiudad, editPais;
